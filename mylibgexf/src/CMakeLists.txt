@@ -1,8 +1,8 @@
-set (SUBGRAPH_SIG_SRCS ComputeSubgraphSignatures.cpp util.cpp )
+file( GLOB CPPS "*.cpp")
+set (SRCS ${CPPS})
 
-include_directories( 
+include_directories(
 ${GAT_SOURCE_DIR}/include
-${GAT_SOURCE_DIR}/mylibgexf/include
 /opt/local/include
 /opt/local/include/libxml2
 /opt/local/include/eigen3
@@ -15,8 +15,8 @@ ${GAT_SOURCE_DIR}/mylibgexf/include
 /home/robp/dist/stow/eigen-3.1.2/include
 )
 
-link_directories( 
-${GAT_SOURCE_DIR}/lib 
+link_directories(
+${GAT_SOURCE_DIR}/lib
 /opt/local/lib
 /opt/local/lib/gcc47
 /fs/szattic-asmg6/rob/dist/lib
@@ -28,8 +28,7 @@ if (Boost_FOUND)
    include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
-add_executable( ComputeSubgraphSignatures ${SUBGRAPH_SIG_SRCS} )
-target_link_libraries( ComputeSubgraphSignatures xml2 gexf
-tbb
-${Boost_LIBRARIES}
-)
+#add_executable( ComputeSubgraphSignatures ${SUBGRAPH_SIG_SRCS} )
+add_library( gexf SHARED ${SRCS} )
+
+install(TARGETS gexf DESTINATION ${GAT_SOURCE_DIR}/../lib)

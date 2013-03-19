@@ -15,6 +15,9 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/subgraph.hpp>
 #include <boost/graph/graph_utility.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp> 
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 #include <libgexf/libgexf.h>
 
 #include <lemon/smart_graph.h>
@@ -27,7 +30,7 @@
 #include "tbb/task_scheduler_init.h"
 
 #include "actors/SubgraphExtractionActors.hpp"
-
+#include "ezETAProgressBar.hpp"
 //#include "cppa/cppa.hpp"
 
 using std::cout;
@@ -60,13 +63,22 @@ int main(int argc, char* argv[]) {
 
     TCLAP::CmdLine cmd("Find unannotated proteins in an alignment", ' ', "1.0");
     TCLAP::ValueArg<string> graphName("g", "graph", "graph filename", true, "", "string");
+    TCLAP::ValueArg<string> outputName("o", "out", "output filename", true, "", "string");
+    TCLAP::ValueArg<size_t> maxHop("k", "khop", "maximum neighborhood distance", true, 3, "int");
+    TCLAP::ValueArg<size_t> numProc("p", "nproc", "number of threads to use", true, 10, "int");
     cmd.add(graphName);
+    cmd.add(maxHop);
+    cmd.add(numProc);
+    cmd.add(outputName);
 
     cmd.parse(argc, argv);
 
     auto GContainer = read(graphName.getValue());
     auto IG = GContainer.getUndirectedGraph();
     auto GData = GContainer.getData();
+
+    auto maxHopDistance = maxHop.getValue();
+    auto numThreads = numProc.getValue();
 
     struct Vertex{
        string name; // or whatever, maybe nothing
@@ -107,7 +119,6 @@ int main(int argc, char* argv[]) {
       nodeNodeMap[nid] = nodeCnt;
       G[nodeCnt].name = name;
       ++nodeCnt;
-      //nodeList.push_back(u);
     }
 
     const auto& eit = IG.getEdges()->begin();
@@ -115,10 +126,6 @@ int main(int argc, char* argv[]) {
       eit->next();
       auto s = nodeNodeMap[eit->currentSource()];
       auto t = nodeNodeMap[eit->currentTarget()];
-      //auto s = eit->currentSource();
-      //auto t = eit->currentTarget();
-      //if ( G[s].name == "" ) { G[s].name = GData.getNodeAttribute(s, attributeID); }
-      //if ( G[t].name == "" ) { G[t].name = GData.getNodeAttribute(t, attributeID); }
       boost::add_edge(s,t,G);
     }
 
@@ -133,44 +140,71 @@ int main(int argc, char* argv[]) {
     std::mutex m;
     auto q = tbb::concurrent_bounded_queue<VertexDescriptor>();
 
-    /*
-    using actors::VertexDescriptor;
+    ez::ezETAProgressBar eta(boost::num_vertices(G));
 
-    auto gp = shared_ptr<Graph>(&G);
-    
-    q.set_capacity( lemon::countNodes(G) );
-
-    //actors::SubgraphSpectrumWorker<Graph,tbb::concurrent_bounded_queue<VertexDescriptor>> worker(gp, q);    
-    
-    using std::vector;
-    using std::unordered_map;
-    */
-   
-    tbb::task_scheduler_init init(1); //creates 4 threads
-
-    tbb::parallel_for_each( b, e, [&](const VertexID& n) {
-      actors::SubgraphSpectrumWorker<Graph,tbb::concurrent_bounded_queue<actors::VertexDescriptor>> a;
-      std::cerr << "computing signature for vertex " << n << "\n";
-      a.compute(G, q, n, m);
-     }
-    );
+    eta.start();
 
     std::thread result( 
       [&]() {
 
+        boost::iostreams::filtering_ostream out; 
+        out.push(boost::iostreams::gzip_compressor()); 
+        out.push(boost::iostreams::file_descriptor_sink(outputName.getValue())); 
+
+
+        //std::ofstream outfile( outputName.getValue() );
+        int32_t numVerts = boost::num_vertices(G);
+        actors::swap_endian(numVerts);
+        out.write( reinterpret_cast<const char*>(&numVerts), sizeof(numVerts) );
+        int32_t numHops = maxHopDistance;
+        actors::swap_endian(numHops);
+        out.write( reinterpret_cast<const char*>(&numHops), sizeof(numHops) );
+
+        //outfile << boost::num_vertices(G) << '\n';
+        //outfile << maxHopDistance << '\n';
+
         size_t numRemaining = boost::num_vertices(G);
         VertexDescriptor vd;
         while( numRemaining > 0 ){
-          q.pop(vd);
-          auto s = "hello " + boost::lexical_cast<std::string>( vd.id ) + " world\n";
-          std::cerr << "spectrum for vertex : " << vd.id << " =";
-          for ( auto& e : vd.spectra.back() ) { std::cerr << " " << e; } std::cerr << "\n";
+          while( ! q.try_pop(vd) ) {}
+            writeVertexDescriptor( out, vd );
+            /*
+            outfile << vd.id << '\n';
+          size_t lastValidLevel = 0;
+          for( auto level : boost::irange(size_t(0), maxHopDistance) ) {
+            if ( vd.levelInfo.find(level) != vd.levelInfo.end() ) {
+              outfile << vd.levelInfo[level].spectrum.size() << '\n';
+              for( auto v : vd.levelInfo[level].spectrum ) { outfile << v << ' '; }
+              outfile << '\n';
+              lastValidLevel = level;
+            } else {
+              outfile << vd.levelInfo[lastValidLevel].spectrum.size() << '\n';
+              for( auto v : vd.levelInfo[lastValidLevel].spectrum ) { outfile << v << ' '; }
+              outfile << '\n';              
+            }
+            
+          }*/
           --numRemaining;
+          ++eta;
         }
 
+        //outfile.close();
+        //out.close();
       }
-      );
+     );
 
+   
+    tbb::task_scheduler_init init(numThreads); //creates 4 threads
+
+    tbb::parallel_for_each( b, e, [&](const VertexID& n) {
+      actors::SubgraphSpectrumWorker<Graph,tbb::concurrent_bounded_queue<actors::VertexDescriptor>> a;
+      a.compute(G, maxHopDistance, q, n, m);
+      //std::cerr << "finished computing signature for vertex " << n << "\n";
+     }
+    );
+
+
+    result.join();
     return 0;
     
   } catch (TCLAP::ArgException &e) {

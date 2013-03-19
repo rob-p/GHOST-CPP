@@ -4,9 +4,9 @@
 #include <vector>
 #include <cmath>
 #include <boost/graph/adjacency_list.hpp>
-#include <Eigen/Sparse>
-#include <Eigen/Dense>
-#include <Eigen/Eigenvalues>
+#include <eigen3/Eigen/Sparse>
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/Eigenvalues>
 #include "redsvd/redsvd.hpp"
 
 template <typename Graph>
@@ -66,11 +66,11 @@ public:
     // Fill in the matrix
     L.setFromTriplets( triplets.begin(), triplets.end() );
 
-    REDSVD::RedSymEigen es(L, L.rows()-1);
-    //MatrixXd DL(L);
+    //REDSVD::RedSymEigen es(L, L.rows()-1);
+    MatrixXd DL(L);
     //Eigen::SelfAdjointEigenSolver< MatrixXd > es( DL );
     //es.computeDirect(L, Eigen::DecompositionOptions::EigenvaluesOnly );
-    auto evals = es.eigenValues();
+    auto evals = DL.selfadjointView<Eigen::Upper>().eigenvalues();
 
     auto numEvals = evals.rows();
     std::vector<double> ev(numEvals, 0.0);
