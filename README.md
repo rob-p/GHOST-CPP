@@ -39,7 +39,7 @@ now the build directory should include a `ComputeSubgraphSignatures` executable.
 You should be able to run this as follows:
 
 ```bash
-$ ./ComputeSubgraphSignatures -g <inputgraph> -k <num hops> -o <sigfile> -p <# procs to use>
+$ ./ComputeSubgraphSignatures -i <inputgraph> -k <num hops> -o <sigfile> -p <# procs to use>
 ```
 
 This will compute the signatures for `<inputgraph>` and write the output to `<sigfile>`.
