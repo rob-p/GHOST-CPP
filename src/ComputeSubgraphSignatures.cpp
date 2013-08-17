@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
   try {
 
     TCLAP::CmdLine cmd("Find unannotated proteins in an alignment", ' ', "1.0");
-    TCLAP::ValueArg<string> graphName("g", "graph", "graph filename", true, "", "string");
+    TCLAP::ValueArg<string> graphName("i", "input", "graph filename", true, "", "string");
     TCLAP::ValueArg<string> outputName("o", "out", "output filename", true, "", "string");
     TCLAP::ValueArg<size_t> maxHop("k", "khop", "maximum neighborhood distance", true, 3, "int");
     TCLAP::ValueArg<size_t> numProc("p", "nproc", "number of threads to use", true, 10, "int");
