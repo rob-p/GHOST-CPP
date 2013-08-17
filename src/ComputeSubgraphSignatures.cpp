@@ -23,6 +23,9 @@
 #include <lemon/smart_graph.h>
 #include <lemon/concepts/graph.h>
 
+#include "g2logworker.h"
+#include "g2log.h"
+
 #include "tclap/CmdLine.h"
 
 #include "tbb/concurrent_queue.h"
@@ -73,6 +76,10 @@ int main(int argc, char* argv[]) {
 
     cmd.parse(argc, argv);
 
+    string logFilePath(".");
+    g2LogWorker logger(argv[0], logFilePath);
+    g2::initializeLogging(&logger);
+
     auto GContainer = read(graphName.getValue());
     auto IG = GContainer.getUndirectedGraph();
     auto GData = GContainer.getData();
@@ -91,11 +98,11 @@ int main(int argc, char* argv[]) {
     typedef boost::property<boost::edge_index_t, size_t, Edge> edge_prop;
 
     typedef boost::adjacency_list <
-        boost::vecS,                //  The container used for egdes : here, std::list.
+        boost::vecS,                //  The container used for egdes : here, std::vector.
         boost::vecS,                //  The container used for vertices: here, std::vector.
         boost::undirectedS,         //  undirected graph
-        vertex_prop,                     //  The type that describes a Vertex.
-        edge_prop                        //  The type that describes an Edge
+        vertex_prop,                //  The type that describes a Vertex.
+        edge_prop                   //  The type that describes an Edge
     > GraphT;
 
     typedef boost::subgraph<GraphT> Graph;
@@ -115,7 +122,7 @@ int main(int argc, char* argv[]) {
     while ( nit->hasNext() ) {
       auto nid = nit->next();
       auto name = GData.getNodeAttribute(nid, attributeID);
-      std::cerr << "node : " << name << "\n";
+      LOG(INFO) << "node : " << name << "\n";
       nodeNodeMap[nid] = nodeCnt;
       G[nodeCnt].name = name;
       ++nodeCnt;
@@ -132,7 +139,7 @@ int main(int argc, char* argv[]) {
     Graph::vertex_iterator b,e;
     std::tie(b,e) = boost::vertices(G);
     for ( auto v = b; v < e; ++v ) {
-      std::cerr << "node : " << G[*v].name << " -> " << *v << "\n";
+      LOG(INFO) << "node : " << G[*v].name << " -> " << *v << "\n";
     }
 
 
@@ -194,12 +201,11 @@ int main(int argc, char* argv[]) {
      );
 
    
-    tbb::task_scheduler_init init(numThreads); //creates 4 threads
+    tbb::task_scheduler_init init(numThreads); //creates numThreads different threads
 
     tbb::parallel_for_each( b, e, [&](const VertexID& n) {
       actors::SubgraphSpectrumWorker<Graph,tbb::concurrent_bounded_queue<actors::VertexDescriptor>> a;
       a.compute(G, maxHopDistance, q, n, m);
-      //std::cerr << "finished computing signature for vertex " << n << "\n";
      }
     );
 
@@ -208,7 +214,7 @@ int main(int argc, char* argv[]) {
     return 0;
     
   } catch (TCLAP::ArgException &e) {
-    std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
+    LOG(FATAL) << "error: " << e.error() << " for arg " << e.argId() << std::endl;
   }
 
   return 0;
