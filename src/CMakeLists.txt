@@ -7,9 +7,7 @@ ${GAT_SOURCE_DIR}/external/install/include
 ${GAT_SOURCE_DIR}/3rdParty/g2log/src
 ${LIBXML2_INCLUDE_DIR}
 ${TBB_INCLUDE_DIRS}
-/opt/local/include/eigen3
-/fs/szattic-asmg6/rob/dist/stow/eigen-3.1/include/
-/home/robp/dist/stow/eigen-3.1.2/include
+${EIGEN3_INCLUDE_DIR}
 )
 
 link_directories( 

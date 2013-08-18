@@ -52,6 +52,65 @@ FIND_PACKAGE (Boost 1.53 COMPONENTS iostreams filesystem system program_options 
 INCLUDE (ExternalProject)
 
 
+####
+#  Find Eigen
+####
+if (NOT EIGEN_RECONFIGURE)
+    find_package(Eigen3)
+else()
+
+    ##
+    #  If we had to fetch Eigen, the reconfigure step will re-run cmake.  The second configuration
+    #  pass is executed with the EIGEN_RECONFIGURE flag set. This should allow our newly
+    #  installed Eigen to be found by CMake.    
+    ##
+
+    unset(EIGEN3_FOUND CACHE)
+    unset(EIGEN3_INCLUDE_DIR CACHE)
+    unset(CMAKE_PREFIX_PATH CACHE)
+    set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/external/install)
+    set(EIGEN3_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/install/include/eigen3)
+    find_package(Eigen3)
+endif()
+
+if (NOT EIGEN3_FOUND)
+
+ set(EIGEN_WILL_RECONFIGURE TRUE)
+ message("Build system will fetch and install Eigen")
+ message("==================================================================")
+
+  ExternalProject_Add(libeigen
+  DOWNLOAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external
+  URL http://www.cs.cmu.edu/~robp/files/eigen-3.2.0.tar.gz
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/eigen
+  INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/install
+  CONFIGURE_COMMAND ${CMAKE_COMMAND} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>
+  BUILD_COMMAND ""
+  INSTALL_COMMAND make install)
+
+  ##
+  # After we've installed boost, 
+  ##
+  ExternalProject_Add_Step(libeigen reconfigure
+      COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR} -DEIGEN_WILL_RECONFIGURE=FALSE -DEIGEN_RECONFIGURE=TRUE 
+      DEPENDEES install
+  )
+else()
+  include_directories(${EIGEN3_INCLUDE_DIR})
+endif()
+
+##
+# If we're fetching eigen and we need to have dummy paths for these variables
+# so that CMake won't complain
+##
+if (EIGEN_WILL_RECONFIGURE)
+    message("Setting Temporary Eigen paths")
+    set(EIGEN3_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/install/include/eigne3)
+    set(EIGEN3_FOUND TRUE)
+endif()
+
+
+
 ##
 # Either inform the user of how to obtain Boost, or, if they passed in the FETCH_BOOST
 # option, go and grab it for them.
