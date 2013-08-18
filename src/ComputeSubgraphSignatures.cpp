@@ -21,9 +21,6 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <libgexf/libgexf.h>
 
-#include <lemon/smart_graph.h>
-#include <lemon/concepts/graph.h>
-
 #include "g2logworker.h"
 #include "g2log.h"
 
