@@ -32,5 +32,5 @@ done
 cp build/src/ComputeSubgraphSignatures GHOST-Signature-Extractor/bin
 echo "#/bin/bash" > GHOST-Signature-Extractor/ExtractSignatures.sh
 echo $EXTRACTCMD >> GHOST-Signature-Extractor/ExtractSignatures.sh
-
+chmod a+x GHOST-Signature-Extractor/ExtractSignatures.sh
 
