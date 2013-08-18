@@ -3,7 +3,7 @@ set (GHOST_SRCS Ghost.cpp GlobalAlignmentDriver.cpp util.cpp )
 
 include_directories( 
 ${GAT_SOURCE_DIR}/include
-${GAT_SOURCE_DIR}/mylibgexf/include
+${GAT_SOURCE_DIR}/external/install/include
 ${GAT_SOURCE_DIR}/3rdParty/g2log/src
 ${LIBXML2_INCLUDE_DIR}
 /opt/local/include/eigen3
