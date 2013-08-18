@@ -29,7 +29,7 @@ do
 done
 
 cp build/src/ComputeSubgraphSignatures GHOST-Signature-Extractor/bin
-echo "#/bin/bash" >> GHOST-Signature-Extractor/ExtractSignatures.sh
+echo "#/bin/bash" > GHOST-Signature-Extractor/ExtractSignatures.sh
 echo $EXTRACTCMD >> GHOST-Signature-Extractor/ExtractSignatures.sh
 
 

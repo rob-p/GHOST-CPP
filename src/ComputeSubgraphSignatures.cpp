@@ -65,8 +65,8 @@ int main(int argc, char* argv[]) {
   
   try {
   string logFilePath(".");
-  //g2LogWorker logger(argv[0], logFilePath);
-  //g2::initializeLogging(&logger);
+  g2LogWorker logger(argv[0], logFilePath);
+  g2::initializeLogging(&logger);
   size_t maxCPUs = std::thread::hardware_concurrency();
 
   // Those options only relevant to the parsimony method
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
     while ( nit->hasNext() ) {
       auto nid = nit->next();
       auto name = GData.getNodeAttribute(nid, attributeID);
-      //LOG(INFO) << "node : " << name << "\n";
+      LOG(INFO) << "node : " << name << "\n";
       nodeNodeMap[nid] = nodeCnt;
       G[nodeCnt].name = name;
       ++nodeCnt;
@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) {
     Graph::vertex_iterator b,e;
     std::tie(b,e) = boost::vertices(G);
     for ( auto v = b; v < e; ++v ) {
-      //LOG(INFO) << "node : " << G[*v].name << " -> " << *v << "\n";
+      LOG(INFO) << "node : " << G[*v].name << " -> " << *v << "\n";
     }
 
 
@@ -236,8 +236,8 @@ int main(int argc, char* argv[]) {
     return 0;
 
   } catch (exception &e) {
-        //LOG(FATAL) << "Caught Exception: [" << e.what() << "]\n";
-        return 2;
+        LOG(FATAL) << "Caught Exception: [" << e.what() << "]\n";
+        std::exit(2);
   }
 
   return 0;
