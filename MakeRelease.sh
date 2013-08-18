@@ -16,6 +16,7 @@ if [ `uname` == "Linux" ]
 then
     HOST=Linux
     LIBS=`ldd build/src/ComputeSubgraphSignatures | grep "=>" | awk '{ if(NF>3) {print $3} }'`
+    EXTRACTCMD="LD_LIBRARY_PATH=lib:\$LD_LIBRARY_PATH bin/ComputeSubgraphSignatures \$@"    
 fi
 
 mkdir -p GHOST-Signature-Extractor/lib
