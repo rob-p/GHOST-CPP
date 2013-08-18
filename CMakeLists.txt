@@ -19,9 +19,6 @@ SET(CPACK_SOURCE_PACKAGE_FILE_NAME
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-
-SET (CMAKE_CXX_FLAGS "-std=c++11 -O3")# -Wl,-rpath,\$$ORIGIN/../lib") 
-
 SET (GAT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -39,7 +36,7 @@ ENDIF()
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 SET (CMAKE_BUILD_TYPE Release)
-SET (CMAKE_CXX_FLAGS "-g -O3 -DHAVE_ANSI_TERM -DNDEBUG -arch x86_64 -std=c++11 -Wl,-no_pie -Wno-deprecated ${CMAKE_CXX_FLAGS}")
+SET (CMAKE_CXX_FLAGS "-O3 -DHAVE_ANSI_TERM -DNDEBUG -std=c++11 -Wl,-no_pie -Wno-deprecated ${CMAKE_CXX_FLAGS}")
 
 
 FIND_PACKAGE (Boost 1.53 COMPONENTS iostreams filesystem system program_options )
