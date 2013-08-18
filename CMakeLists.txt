@@ -234,8 +234,15 @@ ExternalProject_Add(libtbb
     BUILD_IN_SOURCE 1
 )
 
-add_custom_command(TARGET libtbb PRE_BUILD COMMAND mkdir -p ${TBB_INSTALL_DIR}/lib)
-add_custom_command(TARGET libtbb PRE_BUILD COMMAND mkdir -p ${TBB_INSTALL_DIR}/include)
+ExternalProject_Add_Step(libtbb mkdirs 
+COMMAND mkdir -p ${TBB_INSTALL_DIR}/lib
+DEPENDEES install
+)
+
+ExternalProject_Add_Step(libtbb mkdirs 
+COMMAND mkdir  -p ${TBB_INSTALL_DIR}/include
+DEPENDEES install
+)
 
 ExternalProject_Add_Step(libtbb reconfigure
         COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR} -DTBB_WILL_RECONFIGURE=FALSE -DTBB_RECONFIGURE=TRUE
