@@ -26,8 +26,15 @@ add_custom_command(TARGET gexf POST_BUILD
                    ${GAT_SOURCE_DIR}/external/install/lib/libgexf.${SHARED_LIB_EXT})
 
 add_custom_command(TARGET gexf POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${GAT_SOURCE_DIR}/mylibgexf/include
-                   ${GAT_SOURCE_DIR}/external/install/)
+ 	            	COMMAND ${CMAKE_COMMAND} -E make_directory ${GAT_SOURCE_DIR}/external/install/include/libgexf)
+
+file(GLOB GEXF_HEADERS ${GAT_SOURCE_DIR}/mylibgexf/include/*.h")
+foreach(file ${GEXF_HEADERS})
+	add_custom_command(TARGET gexf POST_BUILD
+    	               COMMAND ${CMAKE_COMMAND} -E copy ${GAT_SOURCE_DIR}/mylibgexf/include/${file}
+        	           ${GAT_SOURCE_DIR}/external/install/include/libgexf/${file})
+endforeach()
+
 
 
 #install(TARGETS gexf DESTINATION ${GAT_SOURCE_DIR}/external/install/lib)
