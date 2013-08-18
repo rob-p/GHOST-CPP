@@ -19,7 +19,7 @@ ENDIF()
 if (${OperatingSystem} MATCHES "Mac OS X")
 	set (CMAKE_CXX_FLAGS "-undefined dynamic_lookup")
 elseif(${OperatingSystem} MATCHES "Linux")
-	set (CMAKE_CXX_FLAGS "-Wl,--no-undefined")
+	set (CMAKE_CXX_FLAGS "-Wl,--unresolved-symbols=ignore-all")
 endif()
 
 set (LIBGEXF_TLDIR ${CMAKE_CURRENT_SOURCE_DIR})
