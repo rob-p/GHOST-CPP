@@ -23,15 +23,20 @@ endif()
 
 add_executable( ComputeSubgraphSignatures ${SUBGRAPH_SIG_SRCS} )
 add_executable( Ghost ${GHOST_SRCS} )
-target_link_libraries( ComputeSubgraphSignatures xml2 
-"-Wl,-Bdynamic" gexf
+target_link_libraries( ComputeSubgraphSignatures
+"-Wl,-Bdynamic" 
+${LIBXML2_LIBRARIES}
+gexf
 tbb
 ${Boost_LIBRARIES}
 lib_activeobject
 lib_g2logger
 )
 
-target_link_libraries( Ghost xml2 gexf
+target_link_libraries( Ghost 
+"-Wl,-Bdynamic" 
+${LIBXML2_LIBRARIES}
+gexf
 tbb
 ${Boost_LIBRARIES}
 lib_activeobject
