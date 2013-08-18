@@ -36,7 +36,7 @@ ENDIF()
 SET(CMAKE_VERBOSE_MAKEFILE ON)
 
 SET (CMAKE_BUILD_TYPE Release)
-SET (CMAKE_CXX_FLAGS "-O3 -DHAVE_ANSI_TERM -DNDEBUG -fPIC -std=c++11 -Wl,-no_pie -Wno-deprecated ${CMAKE_CXX_FLAGS}")
+SET (CMAKE_CXX_FLAGS "-O3 -DHAVE_ANSI_TERM -DNDEBUG -std=c++11 -Wl,-no_pie -Wno-deprecated ${CMAKE_CXX_FLAGS}")
 
 
 FIND_PACKAGE (Boost 1.53 COMPONENTS iostreams filesystem system program_options )
