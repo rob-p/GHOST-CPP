@@ -28,7 +28,7 @@ add_custom_command(TARGET gexf POST_BUILD
 add_custom_command(TARGET gexf POST_BUILD
  	            	COMMAND ${CMAKE_COMMAND} -E make_directory ${GAT_SOURCE_DIR}/external/install/include/libgexf)
 
-file(GLOB GEXF_HEADERS ${GAT_SOURCE_DIR}/mylibgexf/include/*.h")
+file(GLOB GEXF_HEADERS "${GAT_SOURCE_DIR}/mylibgexf/include/*.h")
 foreach(file ${GEXF_HEADERS})
 	add_custom_command(TARGET gexf POST_BUILD
     	               COMMAND ${CMAKE_COMMAND} -E copy ${GAT_SOURCE_DIR}/mylibgexf/include/${file}
