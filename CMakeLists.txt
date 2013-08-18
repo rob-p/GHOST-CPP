@@ -234,12 +234,12 @@ ExternalProject_Add(libtbb
     BUILD_IN_SOURCE 1
 )
 
-ExternalProject_Add_Step(libtbb mkdirs 
+ExternalProject_Add_Step(libtbb mk_tbb_lib_dirs 
 COMMAND mkdir -p ${TBB_INSTALL_DIR}/lib
 DEPENDEES install
 )
 
-ExternalProject_Add_Step(libtbb mkdirs 
+ExternalProject_Add_Step(libtbb mk_tbb_include_dirs 
 COMMAND mkdir  -p ${TBB_INSTALL_DIR}/include
 DEPENDEES install
 )
