@@ -5,24 +5,15 @@ include_directories(
 ${GAT_SOURCE_DIR}/include
 ${GAT_SOURCE_DIR}/mylibgexf/include
 ${GAT_SOURCE_DIR}/3rdParty/g2log/src
-/opt/local/include
-/opt/local/include/libxml2
+${LIBXML2_INCLUDE_DIR}
 /opt/local/include/eigen3
-/fs/szattic-asmg6/rob/dist/include
-/fs/szattic-asmg6/rob/dist/include/libxml2
 /fs/szattic-asmg6/rob/dist/stow/eigen-3.1/include/
-/home/robp/dist/include
-/home/robp/dist/include/libgexf-0.1.1
-/home/robp/dist/include/libxml2
 /home/robp/dist/stow/eigen-3.1.2/include
 )
 
 link_directories( 
 ${GAT_SOURCE_DIR}/lib 
-/opt/local/lib
-/fs/szattic-asmg6/rob/dist/lib
-/fs/szattic-asmg6/rob/dist/lib64
-/home/robp/dist/lib
+${GAT_SOURCE_DIR}/external/install/lib
 ${CMAKE_CURRENT_BINARY_DIR}/3rdParty/g2log
 )
 
@@ -32,7 +23,8 @@ endif()
 
 add_executable( ComputeSubgraphSignatures ${SUBGRAPH_SIG_SRCS} )
 add_executable( Ghost ${GHOST_SRCS} )
-target_link_libraries( ComputeSubgraphSignatures xml2 gexf
+target_link_libraries( ComputeSubgraphSignatures xml2 
+"-Wl,-Bdynamic" gexf
 tbb
 ${Boost_LIBRARIES}
 lib_activeobject
