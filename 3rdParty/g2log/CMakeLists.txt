@@ -63,7 +63,29 @@ if (CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif()
 
 
-IF(UNIX)
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   MESSAGE("")
+   MESSAGE("cmake for OSX ")
+   MESSAGE("if cmake finishes OK, do make")
+   MESSAGE("then run './g2log-FATAL-example' or whatever performance test you feel like trying")
+   MESSAGE("")
+   #set(PLATFORM_LINK_LIBRIES rt)
+   # justthread not needed from gcc4.7.1
+   #           set(PLATFORM_LINK_LIBRIES justthread rt)
+
+   # -rdynamic is needed for correct stack dumps with demangling
+   # -D_GLIBCXX_USE_NANOSLEEP is needed for this_thread sleep (unit testing)
+   set(CMAKE_CXX_FLAGS "-Wall -Wunused -std=c++11 ${CMAKE_CXX_FLAGS_DEBUG} -pthread -D_GLIBCXX_USE_NANOSLEEP -D_XOPEN_SOURCE")
+   set(SRC_PLATFORM_SPECIFIC ${LOG_SRC}/crashhandler_unix.cpp)
+
+   # -- justthread not needed for gcc4.7.1
+   #     set(CMAKE_CXX_FLAGS "-Wall -rdynamic -Wunused -std=c++0x ${CMAKE_CXX_FLAGS_DEBUG} -pthread -I/usr/include/justthread")
+   # -- justhtread not needed for gcc4.7.1
+   #               include_directories("/usr/include/justthread")
+
+ENDIF()
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
    MESSAGE("")
    MESSAGE("cmake for *NIX ")
    MESSAGE("if cmake finishes OK, do make")
@@ -82,7 +104,7 @@ IF(UNIX)
    #     set(CMAKE_CXX_FLAGS "-Wall -rdynamic -Wunused -std=c++0x ${CMAKE_CXX_FLAGS_DEBUG} -pthread -I/usr/include/justthread")
    # -- justhtread not needed for gcc4.7.1
    #               include_directories("/usr/include/justthread")
-   ENDIF(UNIX)
+   ENDIF()
 
    if (MSVC)
       # VC11 bug: http://code.google.com/p/googletest/issues/detail?id=408
@@ -141,7 +163,6 @@ ENDIF(MSVC11)
    add_library(lib_g2logger  ${SRC_FILES})
    set_target_properties(lib_g2logger PROPERTIES LINKER_LANGUAGE CXX)
    target_link_libraries(lib_g2logger lib_activeobject)
-
 
 
    # ============================================================================
@@ -270,7 +291,8 @@ ENDIF(MSVC11)
           endif (USE_G2LOG_UNIT_TEST)
 
 
-
-
+  add_custom_command(TARGET lib_g2logger POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/liblib_g2logger.a 
+                   ${GAT_SOURCE_DIR}/external/install/lib/liblib_g2logger.a)
 
 

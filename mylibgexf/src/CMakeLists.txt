@@ -3,25 +3,14 @@ set (SRCS ${CPPS})
 
 include_directories(
 ${GAT_SOURCE_DIR}/include
-/opt/local/include
-/opt/local/include/libxml2
-/opt/local/include/eigen3
-/fs/szattic-asmg6/rob/dist/include
-/fs/szattic-asmg6/rob/dist/include/libxml2
-/fs/szattic-asmg6/rob/dist/stow/eigen-3.1/include/
-/home/robp/dist/include
-/home/robp/dist/include/libgexf-0.1.1
-/home/robp/dist/include/libxml2
-/home/robp/dist/stow/eigen-3.1.2/include
+${GAT_SOURCE_DIR}/external/install/include
+${LIBGEXF_TLDIR}/include
+${LIBXML2_INCLUDE_DIR}
 )
 
 link_directories(
-${GAT_SOURCE_DIR}/lib
-/opt/local/lib
-/opt/local/lib/gcc47
-/fs/szattic-asmg6/rob/dist/lib
-/fs/szattic-asmg6/rob/dist/lib64
-/home/robp/dist/lib
+${GAT_SOURCE_DIR}/external/install/lib
+${LIBXML2_LIBRARY_DIRS}
 )
 
 if (Boost_FOUND)
@@ -29,6 +18,12 @@ if (Boost_FOUND)
 endif()
 
 #add_executable( ComputeSubgraphSignatures ${SUBGRAPH_SIG_SRCS} )
-add_library( gexf SHARED ${SRCS} )
 
-install(TARGETS gexf DESTINATION ${GAT_SOURCE_DIR}/../lib)
+add_library(gexf SHARED ${SRCS})
+
+add_custom_command(TARGET gexf POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/libgexf.${SHARED_LIB_EXT} 
+                   ${GAT_SOURCE_DIR}/external/install/lib/libgexf.${SHARED_LIB_EXT})
+
+
+#install(TARGETS gexf DESTINATION ${GAT_SOURCE_DIR}/external/install/lib)

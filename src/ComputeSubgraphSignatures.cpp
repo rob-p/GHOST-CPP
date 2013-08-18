@@ -12,6 +12,7 @@
 #include <thread>
 
 #include <boost/config.hpp>
+#include <boost/program_options.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/subgraph.hpp>
 #include <boost/graph/graph_utility.hpp>
@@ -40,6 +41,7 @@ using std::cout;
 using std::string;
 using std::make_shared;
 using std::shared_ptr;
+namespace po = boost::program_options;
 
 libgexf::GEXF read( const string& fname ) {
   libgexf::FileReader* reader = new libgexf::FileReader();
@@ -61,31 +63,56 @@ libgexf::t_id findAttributeID( const libgexf::Data& data, const string& aname ) 
 }
 
 int main(int argc, char* argv[]) {
-
+  
+  using std::exception;
   try {
+    size_t maxCPUs = std::thread::hardware_concurrency();
 
-    TCLAP::CmdLine cmd("Find unannotated proteins in an alignment", ' ', "1.0");
-    TCLAP::ValueArg<string> graphName("i", "input", "graph filename", true, "", "string");
-    TCLAP::ValueArg<string> outputName("o", "out", "output filename", true, "", "string");
-    TCLAP::ValueArg<size_t> maxHop("k", "khop", "maximum neighborhood distance", true, 3, "int");
-    TCLAP::ValueArg<size_t> numProc("p", "nproc", "number of threads to use", true, 10, "int");
-    cmd.add(graphName);
-    cmd.add(maxHop);
-    cmd.add(numProc);
-    cmd.add(outputName);
+    // Those options only relevant to the parsimony method
+    po::options_description align("Options");
+    align.add_options()
+    ("help,h", po::value<bool>()->zero_tokens(), "display this help message")
+    ("out,o", po::value<string>(), "output filename")
+    ("input,i", po::value<string>(), "input graph filename")
+    ("khop,k", po::value<size_t>()->default_value(3), "maximum neighborhood distance")
+    ("nproc,p", po::value<size_t>()->default_value(maxCPUs), "number of threads to use");
 
-    cmd.parse(argc, argv);
+    // TCLAP::CmdLine cmd("Find unannotated proteins in an alignment", ' ', "1.0");
+    // TCLAP::ValueArg<string> graphName("i", "input", "graph filename", true, "", "string");
+    // TCLAP::ValueArg<string> outputName("o", "out", "output filename", true, "", "string");
+    // TCLAP::ValueArg<size_t> maxHop("k", "khop", "maximum neighborhood distance", true, 3, "int");
+    // TCLAP::ValueArg<size_t> numProc("p", "nproc", "number of threads to use", true, 10, "int");
+    // cmd.add(graphName);
+    // cmd.add(maxHop);
+    // cmd.add(numProc);
+    // cmd.add(outputName);
+
+    // cmd.parse(argc, argv);
+
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc, argv).options(align).run(), vm);
+
+    if ( vm.count("help") ){
+      std::cout << "\n\nGHOST Signature Extractor\n\n";
+      std::cout << align << std::endl;
+      std::exit(1);
+    }
+
+    string graphName = vm["input"].as<string>();
+    string outputName = vm["out"].as<string>();
+    size_t maxHopDistance = vm["khop"].as<size_t>();
+    size_t numThreads = vm["nproc"].as<size_t>();
 
     string logFilePath(".");
     g2LogWorker logger(argv[0], logFilePath);
     g2::initializeLogging(&logger);
 
-    auto GContainer = read(graphName.getValue());
+    auto GContainer = read(graphName);
     auto IG = GContainer.getUndirectedGraph();
     auto GData = GContainer.getData();
 
-    auto maxHopDistance = maxHop.getValue();
-    auto numThreads = numProc.getValue();
+    //auto maxHopDistance = maxHop.getValue();
+    //auto numThreads = numProc.getValue();
 
     struct Vertex{
        string name; // or whatever, maybe nothing
@@ -156,7 +183,7 @@ int main(int argc, char* argv[]) {
 
         boost::iostreams::filtering_ostream out; 
         out.push(boost::iostreams::gzip_compressor()); 
-        out.push(boost::iostreams::file_descriptor_sink(outputName.getValue())); 
+        out.push(boost::iostreams::file_descriptor_sink(outputName)); 
 
 
         //std::ofstream outfile( outputName.getValue() );
@@ -213,8 +240,9 @@ int main(int argc, char* argv[]) {
     result.join();
     return 0;
     
-  } catch (TCLAP::ArgException &e) {
-    LOG(FATAL) << "error: " << e.error() << " for arg " << e.argId() << std::endl;
+  } catch (exception &e) {
+        LOG(FATAL) << "Caught Exception: [" << e.what() << "]\n";
+        abort();
   }
 
   return 0;
