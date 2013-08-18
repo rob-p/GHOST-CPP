@@ -42,7 +42,7 @@ SET (CMAKE_BUILD_TYPE Release)
 SET (CMAKE_CXX_FLAGS "-g -O3 -DHAVE_ANSI_TERM -DNDEBUG -arch x86_64 -std=c++11 -Wl,-no_pie -Wno-deprecated ${CMAKE_CXX_FLAGS}")
 
 
-FIND_PACKAGE (Boost 1.54 COMPONENTS iostreams filesystem system program_options )
+FIND_PACKAGE (Boost 1.53 COMPONENTS iostreams filesystem system program_options )
 
 
 ########
@@ -221,6 +221,7 @@ message("==================================================================")
 # These are useful for the custom install step we'll do later
 set(TBB_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/tbb41_20130314oss)
 set(TBB_INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/install)
+
 ExternalProject_Add(libtbb
 	DOWNLOAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external
 	URL http://threadingbuildingblocks.org/sites/default/files/software_releases/source/tbb41_20130314oss_src.tgz
@@ -232,6 +233,9 @@ ExternalProject_Add(libtbb
     INSTALL_COMMAND sh -c "cp ${TBB_SOURCE_DIR}/build/LIBS_release/*.${SHARED_LIB_EXT}* ${TBB_INSTALL_DIR}/lib && cp -r ${TBB_SOURCE_DIR}/include/* ${TBB_INSTALL_DIR}/include"
     BUILD_IN_SOURCE 1
 )
+
+add_custom_command(TARGET libtbb PRE_BUILD COMMAND mkdir -p ${TBB_INSTALL_DIR}/lib)
+add_custom_command(TARGET libtbb PRE_BUILD COMMAND mkdir -p ${TBB_INSTALL_DIR}/include)
 
 ExternalProject_Add_Step(libtbb reconfigure
         COMMAND ${CMAKE_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR} -DTBB_WILL_RECONFIGURE=FALSE -DTBB_RECONFIGURE=TRUE
