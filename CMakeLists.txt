@@ -229,19 +229,9 @@ ExternalProject_Add(libtbb
     INSTALL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/install
     PATCH_COMMAND "${TBB_PATCH_STEP}"
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND make -j3 compiler=${TBB_COMPILER} cfg=release tbb_build_prefix=LIBS
-    INSTALL_COMMAND sh -c "cp ${TBB_SOURCE_DIR}/build/LIBS_release/*.${SHARED_LIB_EXT}* ${TBB_INSTALL_DIR}/lib && cp -r ${TBB_SOURCE_DIR}/include/* ${TBB_INSTALL_DIR}/include"
+    BUILD_COMMAND make compiler=${TBB_COMPILER} cfg=release tbb_build_prefix=LIBS
+    INSTALL_COMMAND sh -c "mkdir -p ${TBB_INSTALL_DIR}/lib && mkdir -p ${TBB_INSTALL_DIR}/include && cp ${TBB_SOURCE_DIR}/build/LIBS_release/*.${SHARED_LIB_EXT}* ${TBB_INSTALL_DIR}/lib && cp -r ${TBB_SOURCE_DIR}/include/* ${TBB_INSTALL_DIR}/include"
     BUILD_IN_SOURCE 1
-)
-
-ExternalProject_Add_Step(libtbb mk_tbb_lib_dirs 
-COMMAND mkdir -p ${TBB_INSTALL_DIR}/lib
-DEPENDEES install
-)
-
-ExternalProject_Add_Step(libtbb mk_tbb_include_dirs 
-COMMAND mkdir  -p ${TBB_INSTALL_DIR}/include
-DEPENDEES install
 )
 
 ExternalProject_Add_Step(libtbb reconfigure
