@@ -25,5 +25,9 @@ add_custom_command(TARGET gexf POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/libgexf.${SHARED_LIB_EXT} 
                    ${GAT_SOURCE_DIR}/external/install/lib/libgexf.${SHARED_LIB_EXT})
 
+add_custom_command(TARGET gexf POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory ${GAT_SOURCE_DIR}/mylibgexf/include
+                   ${GAT_SOURCE_DIR}/external/install/)
+
 
 #install(TARGETS gexf DESTINATION ${GAT_SOURCE_DIR}/external/install/lib)
