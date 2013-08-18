@@ -62,31 +62,24 @@ libgexf::t_id findAttributeID( const libgexf::Data& data, const string& aname ) 
 int main(int argc, char* argv[]) {
   
   using std::exception;
+  
   try {
-    size_t maxCPUs = std::thread::hardware_concurrency();
+  string logFilePath(".");
+  //g2LogWorker logger(argv[0], logFilePath);
+  //g2::initializeLogging(&logger);
+  size_t maxCPUs = std::thread::hardware_concurrency();
 
-    // Those options only relevant to the parsimony method
-    po::options_description align("Options");
-    align.add_options()
-    ("help,h", po::value<bool>()->zero_tokens(), "display this help message")
-    ("out,o", po::value<string>(), "output filename")
-    ("input,i", po::value<string>(), "input graph filename")
-    ("khop,k", po::value<size_t>()->default_value(3), "maximum neighborhood distance")
-    ("nproc,p", po::value<size_t>()->default_value(maxCPUs), "number of threads to use");
+  // Those options only relevant to the parsimony method
+  po::options_description align("Options");
+  align.add_options()
+  ("help,h", po::value<bool>()->zero_tokens(), "display this help message")
+  ("out,o", po::value<string>()->required(), "output filename")
+  ("input,i", po::value<string>()->required(), "input graph filename")
+  ("khop,k", po::value<size_t>()->default_value(3), "maximum neighborhood distance")
+  ("nproc,p", po::value<size_t>()->default_value(maxCPUs), "number of threads to use");
+  po::variables_map vm;
 
-    // TCLAP::CmdLine cmd("Find unannotated proteins in an alignment", ' ', "1.0");
-    // TCLAP::ValueArg<string> graphName("i", "input", "graph filename", true, "", "string");
-    // TCLAP::ValueArg<string> outputName("o", "out", "output filename", true, "", "string");
-    // TCLAP::ValueArg<size_t> maxHop("k", "khop", "maximum neighborhood distance", true, 3, "int");
-    // TCLAP::ValueArg<size_t> numProc("p", "nproc", "number of threads to use", true, 10, "int");
-    // cmd.add(graphName);
-    // cmd.add(maxHop);
-    // cmd.add(numProc);
-    // cmd.add(outputName);
-
-    // cmd.parse(argc, argv);
-
-    po::variables_map vm;
+  try {
     po::store(po::command_line_parser(argc, argv).options(align).run(), vm);
 
     if ( vm.count("help") ){
@@ -95,14 +88,19 @@ int main(int argc, char* argv[]) {
       std::exit(1);
     }
 
+    po::notify(vm); // throws on error, so do after help in case 
+                    // there are any problems 
+    
+  } catch(po::error& e) { 
+    std::cerr << "ERROR: " << e.what() << std::endl << std::endl; 
+    std::cerr << align << std::endl;  
+    std::exit(1);
+  }
+
     string graphName = vm["input"].as<string>();
     string outputName = vm["out"].as<string>();
     size_t maxHopDistance = vm["khop"].as<size_t>();
     size_t numThreads = vm["nproc"].as<size_t>();
-
-    string logFilePath(".");
-    g2LogWorker logger(argv[0], logFilePath);
-    g2::initializeLogging(&logger);
 
     auto GContainer = read(graphName);
     auto IG = GContainer.getUndirectedGraph();
@@ -146,7 +144,7 @@ int main(int argc, char* argv[]) {
     while ( nit->hasNext() ) {
       auto nid = nit->next();
       auto name = GData.getNodeAttribute(nid, attributeID);
-      LOG(INFO) << "node : " << name << "\n";
+      //LOG(INFO) << "node : " << name << "\n";
       nodeNodeMap[nid] = nodeCnt;
       G[nodeCnt].name = name;
       ++nodeCnt;
@@ -163,7 +161,7 @@ int main(int argc, char* argv[]) {
     Graph::vertex_iterator b,e;
     std::tie(b,e) = boost::vertices(G);
     for ( auto v = b; v < e; ++v ) {
-      LOG(INFO) << "node : " << G[*v].name << " -> " << *v << "\n";
+      //LOG(INFO) << "node : " << G[*v].name << " -> " << *v << "\n";
     }
 
 
@@ -236,10 +234,10 @@ int main(int argc, char* argv[]) {
 
     result.join();
     return 0;
-    
+
   } catch (exception &e) {
-        LOG(FATAL) << "Caught Exception: [" << e.what() << "]\n";
-        abort();
+        //LOG(FATAL) << "Caught Exception: [" << e.what() << "]\n";
+        return 2;
   }
 
   return 0;

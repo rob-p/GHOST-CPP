@@ -6,6 +6,7 @@ ${GAT_SOURCE_DIR}/include
 ${GAT_SOURCE_DIR}/external/install/include
 ${GAT_SOURCE_DIR}/3rdParty/g2log/src
 ${LIBXML2_INCLUDE_DIR}
+${TBB_INCLUDE_DIRS}
 /opt/local/include/eigen3
 /fs/szattic-asmg6/rob/dist/stow/eigen-3.1/include/
 /home/robp/dist/stow/eigen-3.1.2/include
@@ -15,6 +16,7 @@ link_directories(
 ${GAT_SOURCE_DIR}/lib 
 ${GAT_SOURCE_DIR}/external/install/lib
 ${CMAKE_CURRENT_BINARY_DIR}/3rdParty/g2log
+${TBB_LIBRARY_DIRS}
 )
 
 if (Boost_FOUND)
@@ -24,20 +26,20 @@ endif()
 add_executable( ComputeSubgraphSignatures ${SUBGRAPH_SIG_SRCS} )
 add_executable( Ghost ${GHOST_SRCS} )
 target_link_libraries( ComputeSubgraphSignatures
-"-Wl,-Bdynamic" 
+${DYN_LINK_CMD}
 ${LIBXML2_LIBRARIES}
 gexf
-tbb
+${TBB_LIBRARIES}
 ${Boost_LIBRARIES}
 lib_activeobject
 lib_g2logger
 )
 
 target_link_libraries( Ghost 
-"-Wl,-Bdynamic" 
+${DYN_LINK_CMD}
 ${LIBXML2_LIBRARIES}
 gexf
-tbb
+${TBB_LIBRARIES}
 ${Boost_LIBRARIES}
 lib_activeobject
 lib_g2logger
