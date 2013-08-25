@@ -341,6 +341,12 @@ set(ORIG_ARCHIVE_DIR ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/external/install/lib)
 
 ADD_SUBDIRECTORY (mylibgexf)
+## Don't try to hard-link to the shared library built here.
+## Instead, look for the one in external/install/lib
+unset(gexf CACHE)
+unset(libgexf CACHE)
+unset(libgexf.so CACHE)
+
 ADD_SUBDIRECTORY (src)
 
 
