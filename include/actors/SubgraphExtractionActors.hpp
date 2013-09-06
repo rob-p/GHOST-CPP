@@ -148,8 +148,6 @@ namespace actors {
          }
        }
 
-       auto begEnd = vertices(subG);
-
        if ( peripheryNodes.size() > 0 ) {
          LaplacianCalculator<Graph> lc( subG );
          auto v = lc.getSpectrum();
