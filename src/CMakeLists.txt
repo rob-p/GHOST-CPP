@@ -11,7 +11,6 @@ ${EIGEN3_INCLUDE_DIR}
 )
 
 link_directories( 
-${GAT_SOURCE_DIR}/lib 
 ${GAT_SOURCE_DIR}/external/install/lib
 ${CMAKE_CURRENT_BINARY_DIR}/3rdParty/g2log
 ${TBB_LIBRARY_DIRS}
