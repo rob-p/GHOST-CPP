@@ -125,17 +125,18 @@ namespace actors {
       std::vector< EdgeID > peripheryEdges;
       std::vector< VertexID > current(1, boost::add_vertex(source, subG));
       std::set< VertexID > nodes;
-      nodes.insert(current[0]);
+      nodes.insert(source);
 
       // For each level
       size_t order = 0; size_t size = 0;
       size_t maxLevel = maxHop;
       for ( size_t i = 0; i < maxLevel; ++i ) {
+
        size_t pnum = 0;
        for ( auto& subNode : current ) {
          typename Graph::adjacency_iterator bn, en;
          auto globalSrc = subG.local_to_global(subNode);
-         std::tie(bn,en) = boost::adjacent_vertices( globalSrc, G);
+         std::tie(bn,en) = boost::adjacent_vertices(globalSrc, G);
          for( auto globalTgt = bn;  globalTgt != en; ++globalTgt ) {
            if ( (*globalTgt) != globalSrc ) {
             if ( nodes.find(*globalTgt) == nodes.end() ) {
@@ -147,15 +148,18 @@ namespace actors {
          }
        }
 
+       auto begEnd = vertices(subG);
+
        if ( peripheryNodes.size() > 0 ) {
          LaplacianCalculator<Graph> lc( subG );
          auto v = lc.getSpectrum();
+
          auto density = static_cast<double>( boost::num_vertices(subG) ) / boost::num_edges(subG);
 
          std::vector<std::string> peripheryNodeNames( peripheryNodes.size() );
          for ( auto i : boost::irange(size_t(0), peripheryNodes.size()) ){
           peripheryNodeNames[i] = subG[peripheryNodes[i]].name;
-        }
+         }
         vd.levelInfo[i+1] = { peripheryNodeNames, v, density };
 
         std::swap(current, peripheryNodes);
