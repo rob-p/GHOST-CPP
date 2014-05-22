@@ -43,3 +43,11 @@ lib_g2logger
 )
 
 
+add_dependencies(ComputeSubgraphSignatures libeigen)
+add_dependencies(ComputeSubgraphSignatures libboost)
+add_dependencies(ComputeSubgraphSignatures libtbb)
+add_dependencies(ComputeSubgraphSignatures libxml2)
+add_dependencies(Ghost libeigen)
+add_dependencies(Ghost libboost)
+add_dependencies(Ghost libtbb)
+add_dependencies(Ghost libxml2)
